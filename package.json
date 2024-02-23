@@ -1,0 +1,20 @@
+{
+  "name": "config-management-api",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Configuration Management API",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "http-status": "^1.7.3"
+  }
+}
