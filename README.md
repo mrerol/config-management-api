@@ -40,3 +40,7 @@ cd <repository-name>
 npm install
 node app.js
 ```
+
+## Deployment
+
+The application has been deployed to the [Heroku](https://config-management-api-00eeb967ff68.herokuapp.com/).
