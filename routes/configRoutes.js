@@ -1,14 +1,18 @@
 import Router from 'express';
 import authToken from '../middleware/authToken.js';
 import authUser from '../middleware/authUser.js';
-import { getAllConfigs, addConfig, updateConfig, deleteConfig } from '../controllers/configController.js';
+import ConfigService from '../services/ConfigService.js';
+import ConfigController from '../controllers/ConfigController.js';
 
 const router = Router();
 
-router.route("/get/all").get(authToken, getAllConfigs)
-router.route("/get").get(authUser, getAllConfigs)
-router.route("/add").post(authUser, addConfig)
-router.route("/delete/:id").delete(authUser, deleteConfig)
-router.route("/update/:id").put(authUser, updateConfig)
+const configService = new ConfigService();
+const configController = new ConfigController(configService);
+
+router.route("/get/all").get(authToken, configController.getAllConfigs)
+router.route("/get").get(authUser, configController.getAllConfigs)
+router.route("/add").post(authUser, configController.addConfig)
+router.route("/delete/:id").delete(authUser, configController.deleteConfig)
+router.route("/update/:id").put(authUser, configController.updateConfig)
 
 export default router;

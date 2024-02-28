@@ -2,14 +2,19 @@ import admin from '../config/firebaseConfig.js';
 import CommonUtils from '../utils/CommonUtils.js';
 import config from '../config/dotenvSetup.js';
 
-config();
-const FieldValue = admin.firestore.FieldValue;
-
 class ConfigService {
 
+    FieldValue = admin.firestore.FieldValue;
+
     constructor() {
-        const collectionName = process.env.FIREBASE_COLLECTION_NAME;
-        this.configCollection = admin.firestore().collection(collectionName);
+        try {
+            config();
+            const collectionName = process.env.FIREBASE_COLLECTION_NAME;
+            this.configCollection = admin.firestore().collection(collectionName);
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
     async getAllConfigs() {
@@ -102,4 +107,4 @@ class ConfigService {
     }
 }
 
-export default new ConfigService();
+export default ConfigService;
