@@ -4,13 +4,12 @@ import config from '../config/dotenvSetup.js';
 
 class ConfigService {
 
-    FieldValue = admin.firestore.FieldValue;
-
     constructor() {
         try {
             config();
             const collectionName = process.env.FIREBASE_COLLECTION_NAME;
             this.configCollection = admin.firestore().collection(collectionName);
+            this.fieldValue = admin.firestore.FieldValue
         } catch (e) {
             console.error(e);
             throw e;
@@ -36,11 +35,11 @@ class ConfigService {
             const batch = admin.firestore().batch();
             const docRef = this.configCollection.doc();
             batch.set(docRef, {
-                createDate: FieldValue.serverTimestamp(),
+                createDate: this.fieldValue.serverTimestamp(),
                 description,
                 paramKey,
                 value,
-                updatedAt: FieldValue.serverTimestamp(),
+                updatedAt: this.fieldValue.serverTimestamp(),
             });
             await batch.commit();
             const newDoc = await docRef.get();
@@ -88,18 +87,36 @@ class ConfigService {
 
     async updateConfig(configId, newData) {
         try {
-            const transactionResult = await admin.firestore().runTransaction(async (transaction) => {
+            const lockRef = admin.firestore().collection("locks").doc(configId);
+            const existingLock = await lockRef.get();
+            if (existingLock.exists) {
+                console.log(`Config with ID ${configId} is already locked.`);
+                throw new Error('conflict');
+            }
+            await admin.firestore().runTransaction(async (transaction) => {
+                console.log("inside transaction");
+                const lockSnapshot = await transaction.get(lockRef);
+                if (lockSnapshot.exists) {
+                    console.log(`Config with ID ${configId} is already locked.`);
+                    throw new Error('conflict');
+                }
+                transaction.set(lockRef, {
+                    configId,
+                    lockedAt: new Date(),
+                });
+                console.log(`Lock for config ID ${configId} created.`);
+            });
+            await admin.firestore().runTransaction(async (transaction) => {
                 const configDoc = await transaction.get(this.configCollection.doc(configId));
                 this.checkConfigDocExists(configDoc, configId);
-                const currentData = configDoc.data();
-                CommonUtils.checkTimestampConflict(currentData.updatedAt, newData.updatedAt);
                 transaction.update(this.configCollection.doc(configId), {
                     ...newData,
-                    updatedAt: FieldValue.serverTimestamp(),
+                    updatedAt: this.fieldValue.serverTimestamp(),
                 });
                 console.log('Configuration updated successfully!');
             });
-            console.log(transactionResult);
+            await lockRef.delete();
+            console.log(`Lock for config ID ${configId} released.`);
         } catch (error) {
             console.error('Error updating config: ', error);
             throw error;

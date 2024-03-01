@@ -12,22 +12,22 @@ class CommonUtils {
     return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
 
-  static checkTimestampConflict(currentTimestamp, newTimestamp) {
-    if (currentTimestamp.toMillis() > newTimestamp._seconds * 1000) {
-      throw new Error('Conflict: Document has been modified by another transaction.');
-    }
-  }
-
   static handleSuccess = (res, data) => {
     res.status(200).json({
-       status: 'OK',
-       data,
+      status: 'OK',
+      data,
     });
- };
+    return;
+  };
 
   static handleError = (res, error) => {
     console.error('Error:', error.message);
+    if (error.message === 'conflict') {
+      res.status(409).json({ message: 'conflict' });
+      return;
+    }
     res.status(500).json({ error: 'Internal Server Error' });
+    return;
   };
 }
 
