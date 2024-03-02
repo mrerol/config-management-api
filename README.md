@@ -18,7 +18,8 @@ This project is developing an API to facilitate the management of configurations
 ```bash
 ACCESS_TOKEN=
 PORT=3000
-FIREBASE_COLLECTION_NAME=configs
+FIREBASE_CONFIGS_COLLECTION_NAME=configs
+FIREBASE_LOCKS_COLLECTION_NAME=locks
 FIREBASE_SERVICE_ACCOUNT=
 ```
 
@@ -26,7 +27,9 @@ Place these variables in the ```.env``` file in the same directory as ```app.js`
 
 - ```ACCESS_TOKEN``` is the static token for authentication.
 
-- ```FIREBASE_COLLECTION_NAME``` is the collection name in the Firebase.
+- ```FIREBASE_CONFIGS_COLLECTION_NAME``` is the collection name of the configs in the Firebase.
+
+- ```FIREBASE_LOCKS_COLLECTION_NAME``` is the collection name of the locks in the Firebase.
 
 - ```FIREBASE_SERVICE_ACCOUNT``` represents the settings for the Firebase service account.
 

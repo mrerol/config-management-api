@@ -7,8 +7,9 @@ class ConfigService {
     constructor() {
         try {
             config();
-            const collectionName = process.env.FIREBASE_COLLECTION_NAME;
+            const collectionName = process.env.FIREBASE_CONFIGS_COLLECTION_NAME;
             this.configCollection = admin.firestore().collection(collectionName);
+            this.locksName = process.env.FIREBASE_LOCKS_COLLECTION_NAME;
             this.fieldValue = admin.firestore.FieldValue
         } catch (e) {
             console.error(e);
@@ -85,20 +86,23 @@ class ConfigService {
         }
     }
 
-    async updateConfig(configId, newData) {
+    async updateConfig(configId, newData, lockTimeout = 300000) {
         try {
-            const lockRef = admin.firestore().collection("locks").doc(configId);
-            const existingLock = await lockRef.get();
-            if (existingLock.exists) {
-                console.log(`Config with ID ${configId} is already locked.`);
-                throw new Error('conflict');
-            }
+            // Locking transaction
+
             await admin.firestore().runTransaction(async (transaction) => {
-                console.log("inside transaction");
-                const lockSnapshot = await transaction.get(lockRef);
-                if (lockSnapshot.exists) {
-                    console.log(`Config with ID ${configId} is already locked.`);
-                    throw new Error('conflict');
+                const lockRef = admin.firestore().collection(this.locksName).doc(configId);
+                const existingLock = await transaction.get(lockRef);
+                if (existingLock.exists) {
+                    const lockedAt = existingLock.data().lockedAt.toMillis();
+                    const currentTime = new Date().getTime();
+                    if (currentTime - lockedAt > lockTimeout) {
+                        console.log(`Lock for config ID ${configId} has expired. Releasing lock.`);
+                        transaction.delete(lockRef);
+                    } else {
+                        console.log(`Config with ID ${configId} is already locked.`);
+                        throw new Error('conflict');
+                    }
                 }
                 transaction.set(lockRef, {
                     configId,
@@ -106,6 +110,7 @@ class ConfigService {
                 });
                 console.log(`Lock for config ID ${configId} created.`);
             });
+            // Updating transaction
             await admin.firestore().runTransaction(async (transaction) => {
                 const configDoc = await transaction.get(this.configCollection.doc(configId));
                 this.checkConfigDocExists(configDoc, configId);
@@ -115,11 +120,17 @@ class ConfigService {
                 });
                 console.log('Configuration updated successfully!');
             });
-            await lockRef.delete();
-            console.log(`Lock for config ID ${configId} released.`);
         } catch (error) {
             console.error('Error updating config: ', error);
             throw error;
+        } finally {
+            try {
+                await admin.firestore().collection(this.locksName).doc(configId).delete();
+                console.log(`Lock for config ID ${configId} released.`);
+            } catch (deleteError) {
+                console.error('Error releasing lock: ', deleteError);
+                throw deleteError;
+            }
         }
     }
 }
