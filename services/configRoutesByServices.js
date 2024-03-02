@@ -1,9 +1,9 @@
 import Router from 'express';
 import authToken from '../middleware/authToken.js';
 import authUser from '../middleware/authUser.js';
-import ConfigService from './ConfigService.js';
-import ConfigServiceByMobile from '../services/ConfigServiceByMobile.js';
-import ConfigController from '../controllers/ConfigController.js';
+import ConfigService from './configService.js';
+import ConfigServiceByMobile from './configServiceByMobile.js';
+import ConfigController from '../controllers/configController.js';
 import detectDeviceType from '../middleware/deviceType.js';
 
 const routerByServices = Router();

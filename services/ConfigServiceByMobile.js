@@ -1,4 +1,4 @@
-import ConfigService from './ConfigService.js';
+import ConfigService from './configService.js';
 
 class ConfigServiceByMobile extends ConfigService {
 
