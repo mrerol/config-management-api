@@ -1,3 +1,5 @@
+import CommonUtils from "../utils/CommonUtils.js";
+
 const authToken = async (req, res, next) => {
    const authHeader = req.headers.authorization;
    const token = authHeader && authHeader.split("Bearer ")[1];

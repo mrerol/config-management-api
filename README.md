@@ -16,7 +16,7 @@ This project is developing an API to facilitate the management of configurations
 
 ## Environment Variables
 ```bash
-ACCESS_TOKEN=
+ACCESS_TOKEN=ACCESS_TOKEN
 PORT=3000
 FIREBASE_CONFIGS_COLLECTION_NAME=configs
 FIREBASE_LOCKS_COLLECTION_NAME=locks
