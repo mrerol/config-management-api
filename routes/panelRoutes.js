@@ -1,7 +1,7 @@
 import Router from 'express';
 import authToken from '../middleware/authToken.js';
 import authUser from '../middleware/authUser.js';
-import PanelService from '../services/panelService.js';
+import PanelService from '../services/PanelService.js';
 import PanelController from '../controllers/PanelController.js';
 
 const panelRouter = Router();
