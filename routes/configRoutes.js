@@ -1,6 +1,6 @@
 import Router from 'express';
 import authToken from '../middleware/authToken.js';
-import ConfigService from '../services/ConfigService.js';
+import ConfigService from '../services/configService.js';
 import ConfigController from '../controllers/ConfigController.js';
 
 const configRouter = Router();
